@@ -1,0 +1,188 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum userRole {
+  ADMIN
+  SUPERADMIN
+  VIEWERADMIN
+  JISMONIY
+  YURIDIK
+}
+
+model Users {
+  id                   String     @id @default(uuid())
+  firstName            String
+  lastName             String
+  middleName           String?
+  phone                String
+  password             String
+  region               String
+  userRole             userRole
+  TIN                  String?
+  bankCode             String?
+  bankAccountNumber    String?
+  economicActivityCode String?
+  bankName             String?
+  orders               Orders[]
+  carts                Carts[]
+  comments             Comments[]
+}
+
+enum paymentStatus {
+  PENDING
+  PAID
+  NOTPAID
+  REFUSED
+}
+
+model Orders {
+  id                String     @id @default(uuid())
+  userId            String
+  user              Users      @relation(fields: [userId], references: [id])
+  cartId            String
+  cart              Carts      @relation(fields: [cartId], references: [id])
+  createdAt         DateTime   @default(now())
+  location          String
+  address           String
+  paymentStatus       paymentStatus @default(PENDING)
+  withDelivery      Boolean
+  status            String
+  commentToDelivery String?
+  comments          Comments[]
+}
+
+
+
+model Comments {
+  id        String   @id @default(uuid())
+  orderId   String
+  order     Orders   @relation(fields: [orderId], references: [id])
+  stars     Int
+  createdAt DateTime @default(now())
+  userId    String
+  user      Users    @relation(fields: [userId], references: [id])
+}
+
+model Carts {
+  id               String         @id @default(uuid())
+  createdAt        DateTime       @default(now())
+  userId           String
+  user             Users          @relation(fields: [userId], references: [id])
+  isCompleted      Boolean        @default(false)
+  masterCategoryId String
+  masterCategory   MasterCategory @relation(fields: [masterCategoryId], references: [id])
+  orders           Orders[]
+  cartItems        CartItems[]
+}
+
+model CartItems {
+  id     String @id @default(uuid())
+  cartId String
+  cart   Carts  @relation(fields: [cartId], references: [id])
+  toolId String
+  tool   Tools  @relation(fields: [toolId], references: [id])
+  count  Int
+}
+
+model Tools {
+  id                String       @id @default(uuid())
+  name_uz           String
+  name_en           String
+  name_ru           String
+  desc_uz           String?
+  desc_en           String?
+  desc_ru           String?
+  price             Float
+  quantity          Int
+  brand             String?
+  isActive          Boolean      @default(true)
+  image             String?
+  toolSubCategoryId String
+  toolSubCategory   ToolCategory @relation(fields: [toolSubCategoryId], references: [id])
+  toolReviewId      String?
+  cartItems         CartItems[]
+  attributes        Attributes[]
+}
+
+model ToolCategory {
+  id               String         @id @default(uuid())
+  name_uz          String
+  name_en          String
+  name_ru          String
+  desc_uz          String?
+  desc_en          String?
+  desc_ru          String?
+  icon             String?
+  parentCategoryId String?
+  parentCategory   ToolCategory?  @relation("ToolCategoryHierarchy", fields: [parentCategoryId], references: [id])
+  subCategories    ToolCategory[] @relation("ToolCategoryHierarchy")
+  tools            Tools[]
+}
+
+model Attributes {
+  id          String @id @default(uuid())
+  productId   String
+  product     Tools  @relation(fields: [productId], references: [id])
+  attributeId String
+  value       String
+}
+
+model MasterCategory {
+  id                    String          @id @default(uuid())
+  name_uz               String
+  name_en               String
+  name_ru               String
+  icon                  String?
+  minWorkingHourlyPrice Float?
+  minPriceDaily         Float?
+  toolId                String
+  levelId               String
+  level                 Level           @relation(fields: [levelId], references: [id])
+  carts                 Carts[]
+  masters               Masters[]
+  MasterService         MasterService[]
+}
+
+model Masters {
+  id               String          @id @default(uuid())
+  masterServiceId  String
+  masterService    MasterService   @relation(fields: [masterServiceId], references: [id])
+  fullName         String
+  phone            String
+  isActive         Boolean         @default(true)
+  dateBirth        DateTime
+  experience       Int?
+  image            String?
+  passportImage    String?
+  star             Float?
+  about            String?
+  MasterCategory   MasterCategory? @relation(fields: [masterCategoryId], references: [id])
+  masterCategoryId String?
+}
+
+model MasterService {
+  id               String         @id @default(uuid())
+  masterCategoryId String
+  masterCategory   MasterCategory @relation(fields: [masterCategoryId], references: [id])
+  minWorkingHours  Int?
+  priceHourly      Float?
+  priceDaily       Float?
+  experience       Int?
+  toolId           String?
+  masters          Masters[]
+}
+
+model Level {
+  id               String           @id @default(uuid())
+  name_uz          String
+  name_en          String
+  name_ru          String
+  professionId     String
+  masterCategories MasterCategory[]
+}
