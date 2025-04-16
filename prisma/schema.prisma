@@ -7,6 +7,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model Region {
+  id   String @id @default(uuid())
+  name String
+  createdAt DateTime @default(now())
+  User User[]
+}
+
+model Session {
+  id           String   @id @default(uuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id])
+  ipAddress    String
+  userAgent    String
+  refreshToken String
+  expiresAt    Int
+  createdAt    DateTime @default(now())
+}
+
 enum userRole {
   ADMIN
   SUPERADMIN
@@ -15,23 +33,31 @@ enum userRole {
   YURIDIK
 }
 
-model Users {
+enum userStatus {
+  ACTIVE
+  INACTIVE
+}
+
+model User {
   id                   String     @id @default(uuid())
   firstName            String
   lastName             String
   middleName           String?
   phone                String
   password             String
-  region               String
+  regionId             String
+  userStatus           userStatus @default(INACTIVE)
+  region               Region     @relation(fields: [regionId], references: [id])
   userRole             userRole
   TIN                  String?
   bankCode             String?
   bankAccountNumber    String?
   economicActivityCode String?
   bankName             String?
-  orders               Orders[]
-  carts                Carts[]
-  comments             Comments[]
+  orders               Order[]
+  carts                Cart[]
+  comments             Comment[]
+  Session              Session[]
 }
 
 enum paymentStatus {
@@ -41,56 +67,54 @@ enum paymentStatus {
   REFUSED
 }
 
-model Orders {
-  id                String     @id @default(uuid())
+model Order {
+  id                String        @id @default(uuid())
   userId            String
-  user              Users      @relation(fields: [userId], references: [id])
+  user              User          @relation(fields: [userId], references: [id])
   cartId            String
-  cart              Carts      @relation(fields: [cartId], references: [id])
-  createdAt         DateTime   @default(now())
+  cart              Cart          @relation(fields: [cartId], references: [id])
+  createdAt         DateTime      @default(now())
   location          String
   address           String
-  paymentStatus       paymentStatus @default(PENDING)
+  paymentStatus     paymentStatus @default(PENDING)
   withDelivery      Boolean
   status            String
   commentToDelivery String?
-  comments          Comments[]
+  comments          Comment[]
 }
 
-
-
-model Comments {
+model Comment {
   id        String   @id @default(uuid())
   orderId   String
-  order     Orders   @relation(fields: [orderId], references: [id])
+  order     Order    @relation(fields: [orderId], references: [id])
   stars     Int
   createdAt DateTime @default(now())
   userId    String
-  user      Users    @relation(fields: [userId], references: [id])
+  user      User     @relation(fields: [userId], references: [id])
 }
 
-model Carts {
+model Cart {
   id               String         @id @default(uuid())
   createdAt        DateTime       @default(now())
   userId           String
-  user             Users          @relation(fields: [userId], references: [id])
+  user             User           @relation(fields: [userId], references: [id])
   isCompleted      Boolean        @default(false)
   masterCategoryId String
   masterCategory   MasterCategory @relation(fields: [masterCategoryId], references: [id])
-  orders           Orders[]
-  cartItems        CartItems[]
+  orders           Order[]
+  cartItems        CartItem[]
 }
 
-model CartItems {
+model CartItem {
   id     String @id @default(uuid())
   cartId String
-  cart   Carts  @relation(fields: [cartId], references: [id])
+  cart   Cart   @relation(fields: [cartId], references: [id])
   toolId String
-  tool   Tools  @relation(fields: [toolId], references: [id])
+  tool   Tool   @relation(fields: [toolId], references: [id])
   count  Int
 }
 
-model Tools {
+model Tool {
   id                String       @id @default(uuid())
   name_uz           String
   name_en           String
@@ -106,8 +130,8 @@ model Tools {
   toolSubCategoryId String
   toolSubCategory   ToolCategory @relation(fields: [toolSubCategoryId], references: [id])
   toolReviewId      String?
-  cartItems         CartItems[]
-  attributes        Attributes[]
+  cartItems         CartItem[]
+  attributes        Attribute[]
 }
 
 model ToolCategory {
@@ -122,13 +146,13 @@ model ToolCategory {
   parentCategoryId String?
   parentCategory   ToolCategory?  @relation("ToolCategoryHierarchy", fields: [parentCategoryId], references: [id])
   subCategories    ToolCategory[] @relation("ToolCategoryHierarchy")
-  tools            Tools[]
+  tools            Tool[]
 }
 
-model Attributes {
+model Attribute {
   id          String @id @default(uuid())
   productId   String
-  product     Tools  @relation(fields: [productId], references: [id])
+  product     Tool   @relation(fields: [productId], references: [id])
   attributeId String
   value       String
 }
@@ -144,12 +168,12 @@ model MasterCategory {
   toolId                String
   levelId               String
   level                 Level           @relation(fields: [levelId], references: [id])
-  carts                 Carts[]
-  masters               Masters[]
+  carts                 Cart[]
+  masters               Master[]
   MasterService         MasterService[]
 }
 
-model Masters {
+model Master {
   id               String          @id @default(uuid())
   masterServiceId  String
   masterService    MasterService   @relation(fields: [masterServiceId], references: [id])
@@ -175,7 +199,7 @@ model MasterService {
   priceDaily       Float?
   experience       Int?
   toolId           String?
-  masters          Masters[]
+  masters          Master[]
 }
 
 model Level {
