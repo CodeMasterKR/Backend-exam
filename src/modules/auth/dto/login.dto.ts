@@ -5,7 +5,7 @@ export class loginDto {
 
   @ApiProperty({
     description: "Telefon raqam (+998XXXXXXXXX formatida)",
-    example: '+998901234567',
+    example: '+998945895766',
   })
   @IsString()
   @IsNotEmpty({ message: "Telefon raqam bo'sh bo'lmasligi kerak" })
@@ -14,7 +14,7 @@ export class loginDto {
 
   @ApiProperty({
     description: "Foydalanuvchi paroli (6-20 belgi oralig'ida)",
-    example: 'parol123!',
+    example: '1234567',
     minLength: 6,
     maxLength: 20,
   })

@@ -15,8 +15,10 @@ import { JwtService } from '@nestjs/jwt';
 import { sendOtpDto } from './dto/send-otp.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
 import { ForgotPasswordDto } from './dto/forget-password.dto';
-import { User, userRole } from '@prisma/client';
+import { User } from '@prisma/client';
 import { Request } from 'express';
+import { RegisterAdminDto } from './dto/register-admin.dto';
+import { userRole, userStatus } from 'src/common/enums/enum';
 
 @Injectable()
 export class AuthService {
@@ -197,6 +199,48 @@ export class AuthService {
       }
       console.error(`Password reset failed for ${phone}:`, error);
       throw new InternalServerErrorException('Failed to reset password');
+    }
+  }
+
+  async registerAdmin(dto: RegisterAdminDto): Promise<{ message: string }> {
+    const { phone, password, regionId, ...rest } = dto;
+
+    try {
+      const existingUser = await this.prisma.user.findFirst({ where: { phone } });
+      if (existingUser) {
+        throw new ConflictException('Bu telefon raqami allaqachon ro\'yxatdan o\'tgan');
+      }
+
+      const existingRegion = await this.prisma.region.findFirst({ where: { id: regionId } });
+      if (!existingRegion) {
+        throw new BadRequestException(`regionId ${regionId} ga mos region topilmadi!`);
+      }
+
+      if (dto.userRole == "ADMIN") {
+        throw new BadRequestException('Admin uchun faqat SUPERADMIN yoki VIEWERADMIN rollari ruxsat etiladi');
+      }
+
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      await this.prisma.user.create({
+        data: {
+          phone,
+          password: hashedPassword,
+          regionId,
+          ...rest,
+        },
+      });
+
+      return { message: 'Admin muvaffaqiyatli ro\'yxatdan o\'tdi' };
+    } catch (error) {
+      if (error instanceof ConflictException || error instanceof BadRequestException) {
+        throw error;
+      }
+      console.error(`Admin registration failed for ${phone}:`, {
+        message: error.message,
+        stack: error.stack,
+      });
+      throw new InternalServerErrorException('Admin ro\'yxatdan o\'tkazishda xatolik');
     }
   }
 

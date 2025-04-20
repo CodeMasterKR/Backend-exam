@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -18,9 +19,15 @@ import {
   ApiOperation,
   ApiResponse,
   ApiBody,
+  ApiBearerAuth,
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { User } from '@prisma/client'; 
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { RolesGuard } from '../guards/roles.guard';
+import { userRole } from 'src/common/enums/enum';
+import { Roles } from '../guards/roles.decorator';
+import { RegisterAdminDto } from './dto/register-admin.dto';
 
 @ApiTags('Authentication')
 @Controller('auth')
@@ -123,6 +130,25 @@ export class AuthController {
   @ApiResponse({ status: 500, description: 'Internal Server Error - Failed to reset password.' })
   async resetPassword(@Body() resetPasswordDto: ResetPasswordDto): Promise<Omit<User, 'password'>> {
     return this.authService.resetPassword(resetPasswordDto);
+  }
+
+  @Post('register-admin')
+  @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({ summary: 'Yangi admin ro\'yxatdan o\'tkazish (faqat SUPERADMIN uchun)' })
+  @ApiResponse({
+    status: 201,
+    description: 'Admin muvaffaqiyatli ro\'yxatdan o\'tdi',
+    type: Object,
+    example: { message: 'Admin muvaffaqiyatli ro\'yxatdan o\'tdi' },
+  })
+  @ApiResponse({ status: 400, description: 'Noto\'g\'ri ma\'lumotlar kiritildi yoki region topilmadi' })
+  @ApiResponse({ status: 403, description: 'Ruxsat etilmagan foydalanuvchi' })
+  @ApiResponse({ status: 409, description: 'Telefon raqami allaqachon mavjud' })
+  @ApiResponse({ status: 500, description: 'Server xatosi' })
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  async registerAdmin(@Body() dto: RegisterAdminDto) {
+    return this.authService.registerAdmin(dto);
   }
 
   /*

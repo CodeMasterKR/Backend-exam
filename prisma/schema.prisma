@@ -8,10 +8,10 @@ datasource db {
 }
 
 model Region {
-  id   String @id @default(uuid())
-  name String
+  id        String   @id @default(uuid())
+  name      String
   createdAt DateTime @default(now())
-  User User[]
+  User      User[]
 }
 
 model Session {
@@ -143,9 +143,6 @@ model ToolCategory {
   desc_en          String?
   desc_ru          String?
   icon             String?
-  parentCategoryId String?
-  parentCategory   ToolCategory?  @relation("ToolCategoryHierarchy", fields: [parentCategoryId], references: [id])
-  subCategories    ToolCategory[] @relation("ToolCategoryHierarchy")
   tools            Tool[]
 }
 
@@ -157,37 +154,18 @@ model Attribute {
   value       String
 }
 
-model MasterCategory {
-  id                    String          @id @default(uuid())
-  name_uz               String
-  name_en               String
-  name_ru               String
-  icon                  String?
-  minWorkingHourlyPrice Float?
-  minPriceDaily         Float?
-  toolId                String
-  levelId               String
-  level                 Level           @relation(fields: [levelId], references: [id])
-  carts                 Cart[]
-  masters               Master[]
-  MasterService         MasterService[]
-}
-
 model Master {
-  id               String          @id @default(uuid())
-  masterServiceId  String
-  masterService    MasterService   @relation(fields: [masterServiceId], references: [id])
-  fullName         String
-  phone            String
-  isActive         Boolean         @default(true)
-  dateBirth        DateTime
-  experience       Int?
-  image            String?
-  passportImage    String?
-  star             Float?
-  about            String?
-  MasterCategory   MasterCategory? @relation(fields: [masterCategoryId], references: [id])
-  masterCategoryId String?
+  id            String          @id @default(uuid())
+  fullName      String
+  phone         String
+  isActive      Boolean         @default(true)
+  dateBirth     String
+  experience    Int
+  image         String
+  passportImage String
+  star          Float?
+  about         String
+  MasterService MasterService[]
 }
 
 model MasterService {
@@ -198,15 +176,28 @@ model MasterService {
   priceHourly      Float?
   priceDaily       Float?
   experience       Int?
-  toolId           String?
-  masters          Master[]
+  masterId         String
+  master           Master         @relation(fields: [masterId], references: [id])
+}
+
+model MasterCategory {
+  id                    String          @id @default(uuid())
+  name_uz               String
+  name_en               String
+  name_ru               String
+  icon                  String
+  minWorkingHourlyPrice Float
+  minPriceDaily         Float
+  carts                 Cart[]
+  MasterService         MasterService[]
+  Level                 Level[]
 }
 
 model Level {
-  id               String           @id @default(uuid())
+  id               String         @id @default(uuid())
   name_uz          String
   name_en          String
   name_ru          String
-  professionId     String
-  masterCategories MasterCategory[]
+  masterCategoryId String?
+  masterCategory   MasterCategory? @relation(fields: [masterCategoryId], references: [id])
 }

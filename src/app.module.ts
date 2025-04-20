@@ -6,7 +6,6 @@ import { AtributeModule } from './modules/atribute/atribute.module';
 import { ToolCategoryModule } from './modules/tool-category/tool-category.module';
 import { MasterModule } from './modules/master/master.module';
 import { MasterServiceModule } from './modules/master-service/master-service.module';
-import { LevelItemModule } from './modules/level-item/level-item.module';
 import { LevelModule } from './modules/level/level.module';
 import { MasterCategoryModule } from './modules/master-category/master-category.module';
 import { PrismaModule } from './config/prisma/prisma.module';
@@ -19,7 +18,7 @@ import { AuthModule } from './modules/auth/auth.module';
 import { RegionModule } from './modules/region/region.module';
 
 @Module({
-  imports: [UserModule, ToolModule, ProductAtributeModule, AtributeModule, ToolCategoryModule, MasterModule, MasterServiceModule, LevelItemModule, LevelModule, MasterCategoryModule, PrismaModule, OrderModule, CommentModule, CartModule, CartItemModule, ToolItemModule, AuthModule, RegionModule],
+  imports: [UserModule, ToolModule, ProductAtributeModule, AtributeModule, ToolCategoryModule, MasterModule, MasterServiceModule, LevelModule, MasterCategoryModule, PrismaModule, OrderModule, CommentModule, CartModule, CartItemModule, ToolItemModule, AuthModule, RegionModule],
   controllers: [],
   providers: [],
 })
