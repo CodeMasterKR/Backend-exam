@@ -6,6 +6,8 @@ import {
   HttpStatus,
   Req,
   UseGuards,
+  Get,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -151,19 +153,35 @@ export class AuthController {
     return this.authService.registerAdmin(dto);
   }
 
-  /*
-  // --- Example Protected Route ---
-  // If you had a route that required authentication (e.g., getting user profile)
+  @Post('refresh-token')
+  @HttpCode(200)
+  @ApiOperation({ summary: 'Refresh access token using refresh token' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        refreshToken: { type: 'string', description: 'Refresh token to generate new access token' },
+      },
+      required: ['refreshToken'],
+    },
+  })
+  @ApiResponse({ status: 200, description: 'Returns new access token.', schema: { example: { access: 'new-access-token' } } })
+  @ApiResponse({ status: 400, description: 'Invalid or expired refresh token.' })
+  @ApiResponse({ status: 500, description: 'Internal server error.' })
+  async refreshToken(@Body('refreshToken') refreshToken: string) {
+    if (!refreshToken) {
+      throw new BadRequestException('Refresh token is required');
+    }
+    return this.authService.refreshToken(refreshToken);
+  }
+
   @Get('profile')
-  @UseGuards(JwtAuthGuard) // Apply your JWT authentication guard
-  @ApiBearerAuth() // Indicates in Swagger that Bearer token is needed
+  @UseGuards(JwtAuthGuard) 
+  @ApiBearerAuth() 
   @ApiOperation({ summary: 'Get current user profile' })
   @ApiResponse({ status: 200, description: 'Returns user profile data.'})
   @ApiResponse({ status: 401, description: 'Unauthorized.'})
   getProfile(@Req() req) {
-      // Assuming JwtAuthGuard attaches user object to request
-      // or you have logic to retrieve user based on validated token payload
       return req.user;
   }
-  */
 }

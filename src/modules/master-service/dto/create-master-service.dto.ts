@@ -12,7 +12,7 @@ import {
 export class CreateMasterServiceDto {
   @ApiProperty({
     description: 'ID of the related MasterCategory',
-    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    example: 'uuid',
   })
   @IsString()
   @IsUUID()
@@ -20,7 +20,7 @@ export class CreateMasterServiceDto {
 
   @ApiProperty({
     description: 'ID of the related Master (user)',
-    example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+    example: 'uuid',
   })
   @IsString()
   @IsUUID()
@@ -44,7 +44,7 @@ export class CreateMasterServiceDto {
   })
   @IsOptional()
   @IsNumber()
-  @IsPositive() // Narx manfiy bo'lishi mumkin emas
+  @IsPositive()
   priceHourly?: number;
 
   @ApiPropertyOptional({
@@ -55,7 +55,7 @@ export class CreateMasterServiceDto {
   })
   @IsOptional()
   @IsNumber()
-  @IsPositive() // Narx manfiy bo'lishi mumkin emas
+  @IsPositive() 
   priceDaily?: number;
 
   @ApiPropertyOptional({

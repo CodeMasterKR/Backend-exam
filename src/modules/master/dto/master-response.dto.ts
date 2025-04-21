@@ -1,22 +1,21 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Master } from '@prisma/client'; // Prisma modelini import qilish
+import { Master } from '@prisma/client'; 
 
-// Bu DTO javob strukturasini Swaggerda aniq ko'rsatish uchun
-export class MasterResponseDto implements Omit<Master, 'passportImage'> { // Masalan, passportImage ni qaytarmaymiz
-  @ApiProperty({ example: 'c1b7e1a0-5c3a-4b1e-8f0a-1b2c3d4e5f6a' })
+export class MasterResponseDto implements Omit<Master, 'passportImage'> { 
+  @ApiProperty({ example: 'uuid' })
   id: string;
 
-  @ApiProperty({ example: 'John Doe' })
+  @ApiProperty({ example: 'Ibrohimov Kamron' })
   fullName: string;
 
-  @ApiProperty({ example: '+998901234567' })
+  @ApiProperty({ example: '+998945895766' })
   phone: string;
 
   @ApiProperty({ example: true })
   isActive: boolean;
 
-  @ApiProperty({ example: '1990-05-15T00:00:00.000Z' })
-  dateBirth: string; // Javobda Date bo'lishi mumkin
+  @ApiProperty({ example: '10-09-2003' })
+  dateBirth: string; 
 
   @ApiProperty({ example: 5 })
   experience: number;
@@ -24,26 +23,16 @@ export class MasterResponseDto implements Omit<Master, 'passportImage'> { // Mas
   @ApiProperty({ example: 'https://example.com/images/master.jpg' })
   image: string;
 
-  // passportImage ni chiqarib tashladik
-
   @ApiProperty({ example: 4.5, nullable: true })
   star: number | null;
 
-  @ApiProperty({ example: 'Experienced hairdresser...' })
+  @ApiProperty({ example: 'student...' })
   about: string;
 
-  @ApiProperty({ example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479' })
+  @ApiProperty({ example: 'uuid' })
   masterCategoryId: string;
-
-  // Agar createdAt/updatedAt bo'lsa, ularni ham qo'shish mumkin
-  // @ApiProperty()
-  // createdAt: Date;
-  // @ApiProperty()
-  // updatedAt: Date;
 }
 
-
-// Pagination javobi uchun DTO
 export class PaginatedMasterResponseDto {
     @ApiProperty({ type: [MasterResponseDto] })
     data: MasterResponseDto[];

@@ -118,17 +118,19 @@ export class AuthService {
         throw new BadRequestException('Invalid phone or password');
       }
 
-      // if (user.userStatus === 'INACTIVE') {
-      //   throw new BadRequestException('Your account is not active');
-      // }
+      if (user.userStatus === 'INACTIVE') {
+        throw new BadRequestException('Your account is not active');
+      }
 
-      // await this.prisma.session.create({
-      //   data: {
-      //     ipAddress: req.ip,
-      //     userId: user.id,
-      //     deviceInfo: req.headers['user-agent'] || 'Unknown Device',
-      //   },
-      // });
+      await this.prisma.session.create({
+        data: {
+          ipAddress: req.ip || 'unknown',
+          userId: user.id,
+          userAgent: req.headers['user-agent'] || 'Unknown Device',
+          refreshToken: this.genRefreshToken({ id: user.id, role: user.userRole, status: user.userStatus }),
+          expiresAt: Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60, 
+        },
+      });
 
       const payload = { id: user.id, role: user.userRole, status: user.userStatus };
       const refreshToken = this.genRefreshToken(payload);
@@ -142,7 +144,7 @@ export class AuthService {
       console.error(`Login failed for ${phone}:`, error);
       throw new InternalServerErrorException('Failed to login');
     }
-  }
+}
 
   async sendOTP(sendOtpDto: sendOtpDto): Promise<{ message: string; otp: string }> {
     const { phone } = sendOtpDto;
@@ -241,6 +243,69 @@ export class AuthService {
         stack: error.stack,
       });
       throw new InternalServerErrorException('Admin ro\'yxatdan o\'tkazishda xatolik');
+    }
+  }
+
+  async refreshToken(refreshToken: string): Promise<{ access: string }> {
+    try {
+      const payload = this.jwtService.verify(refreshToken, {
+        secret: this.refreshKEY,
+      });
+  
+      const user = await this.prisma.user.findUnique({
+        where: { id: payload.id },
+      });
+  
+      if (!user) {
+        throw new BadRequestException('Invalid refresh token');
+      }
+  
+      if (user.userStatus !== 'ACTIVE') {
+        throw new BadRequestException('User account is not active');
+      }
+  
+      const newAccessToken = this.genAccessToken({
+        id: user.id,
+        role: user.userRole,
+        status: user.userStatus,
+      });
+  
+      return { access: newAccessToken };
+    } catch (error) {
+      if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+        throw new BadRequestException('Invalid or expired refresh token');
+      }
+      console.error('Refresh token error:', error);
+      throw new InternalServerErrorException('Failed to refresh token');
+    }
+  }
+
+  async getProfile(userId: string): Promise<Omit<User & { region?: { id: string; name: string } }, 'password'>> {
+    try {
+      const user = await this.prisma.user.findUnique({
+        where: { id: userId },
+        include: {
+          region: {
+            select: {
+              id: true,
+              name: true,
+            },
+          },
+        },
+      });
+  
+      if (!user) {
+        throw new NotFoundException('User not found');
+      }
+  
+      const { password, ...result } = user;
+      return result;
+    } catch (error) {
+      if (error instanceof NotFoundException) {
+        throw error;
+      }
+      console.error(`Failed to fetch profile for user ${userId}:`, error);
+      throw new InternalServerErrorException('Failed to fetch profile');
     }
   }
 

@@ -22,34 +22,36 @@ import {
   ApiResponse,
   ApiQuery,
   ApiParam,
-  ApiBearerAuth, // JWT uchun
+  ApiBearerAuth,
   ApiBody,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard'; // JWT Guard joylashuviga moslang
-import { Master } from '@prisma/client'; // Javob turi uchun
+import { JwtAuthGuard } from '../guards/jwt-auth.guard';
+import { RolesGuard } from '../guards/roles.guard'; 
+import { Master, userRole } from '@prisma/client';
+import { Roles } from '../guards/roles.decorator';
 
 
-// Namunaviy Master obyekt Swagger uchun
 const masterExample = {
-    id: 'b7a3c3f0-4b5a-4a1e-8c9a-7d6e5f4d3c2b',
-    fullName: 'Jane Doe',
-    phone: '+998917654321',
+    id: 'uuid',
+    fullName: 'Ibrohimov Kamron',
+    phone: '+998945895766',
     isActive: true,
-    dateBirth: '1995-10-20T00:00:00.000Z',
+    dateBirth: '10-09-2003',
     experience: 3,
-    image: 'https://example.com/images/jane.jpg',
-    passportImage: 'https://example.com/passports/jane.jpg',
+    image: 'https://example.com/images/kamron.jpg',
+    passportImage: 'https://example.com/passports/kamron.jpg',
     star: 4.8,
     about: 'Friendly and experienced master.',
-    createdAt: new Date().toISOString(), // Prisma avtomatik qo'shadi
-    updatedAt: new Date().toISOString(), // Prisma avtomatik qo'shadi
-    // MasterService[] ni qo'shish mumkin agar kerak bo'lsa
+    createdAt: new Date().toISOString(), 
+    updatedAt: new Date().toISOString(), 
 };
 
 
-@ApiTags('Masters') // Swagger guruh nomi
-@ApiBearerAuth() // Barcha endpointlar uchun JWT himoyasini bildiradi
-@UseGuards(JwtAuthGuard) // Barcha endpointlarga JWT guardni qo'llash
+
+@ApiTags('Masters') 
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard, RolesGuard) 
+@Roles(userRole.ADMIN, userRole.SUPERADMIN)
 @Controller('masters')
 export class MasterController {
   constructor(private readonly masterService: MasterService) {}
@@ -62,7 +64,7 @@ export class MasterController {
           value: "dfsdf"
       }
   }})
-  @ApiResponse({ status: 201, description: 'Master muvaffaqiyatli yaratildi.', type: CreateMasterDto /* Yoki Master turi */ })
+  @ApiResponse({ status: 201, description: 'Master muvaffaqiyatli yaratildi.', type: CreateMasterDto })
   @ApiResponse({ status: 400, description: 'Noto‘g‘ri kiritish maʼlumotlari.' })
   @ApiResponse({ status: 401, description: 'Avtorizatsiyadan oʻtilmagan.' })
   create(@Body() createMasterDto: CreateMasterDto): Promise<Master> {
@@ -82,7 +84,7 @@ export class MasterController {
     description: 'Masterlar roʻyxati va paginatsiya maʼlumotlari.',
     schema: {
        properties: {
-           data: { type: 'array', items: { example: masterExample /* Schema to'liqroq bo'lishi kk*/ } },
+           data: { type: 'array', items: { example: masterExample } },
            meta: {
                type: 'object',
                properties: {
@@ -98,7 +100,6 @@ export class MasterController {
   })
   @ApiResponse({ status: 401, description: 'Avtorizatsiyadan oʻtilmagan.' })
   findAll(@Query() queryDto: QueryMasterDto) {
-    // Default qiymatlarni o'rnatish (DTOda qilingan bo'lsa ham, bu yerda ham mumkin)
     const defaults: QueryMasterDto = { page: 1, limit: 10, sortBy: 'fullName', sortOrder: 'asc'};
     const queryParams = { ...defaults, ...queryDto };
     return this.masterService.findAll(queryParams);
@@ -112,7 +113,6 @@ export class MasterController {
   @ApiResponse({ status: 400, description: 'Notoʻgʻri ID formati (UUID emas).' })
   @ApiResponse({ status: 401, description: 'Avtorizatsiyadan oʻtilmagan.' })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Master> {
-    // ParseUUIDPipe IDning UUID formatida ekanligini tekshiradi
     return this.masterService.findOne(id);
   }
 
@@ -147,7 +147,7 @@ export class MasterController {
   @ApiResponse({ status: 404, description: 'Oʻchiriladigan Master topilmadi.' })
   @ApiResponse({ status: 400, description: 'Notoʻgʻri ID formati (UUID emas).' })
   @ApiResponse({ status: 401, description: 'Avtorizatsiyadan oʻtilmagan.' })
-  @HttpCode(HttpStatus.NO_CONTENT) // Muvaffaqiyatli o'chirishda 204 statusini qaytarish
+  @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id', ParseUUIDPipe) id: string): Promise<string> {
     return this.masterService.remove(id);
   }

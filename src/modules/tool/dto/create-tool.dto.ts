@@ -64,16 +64,16 @@ export class CreateToolDto {
 
   @ApiPropertyOptional({ example: 'https://example.com/images/hammer.jpg' })
   @IsOptional()
-  @IsString() // Consider using IsUrl if it must be a URL
+  @IsString() 
   image?: string;
 
-  @ApiProperty({ example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef' })
+  @ApiProperty({ example: 'uuid' })
   @IsString()
   @IsUUID()
-  toolSubCategoryId: string; // Changed from toolSubCategoryId to match model
+  toolSubCategoryId: string; 
 
-  @ApiPropertyOptional({ example: 'review-uuid-123' })
+  @ApiPropertyOptional({ example: 'uuid' })
   @IsOptional()
-  @IsString() // Assuming it's just an ID string for now
+  @IsString() 
   toolReviewId?: string;
 }

@@ -43,11 +43,11 @@ export class QueryToolDto {
   @ApiPropertyOptional({ example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef', format: 'uuid' })
   @IsOptional()
   @IsUUID()
-  toolSubCategoryId?: string; // Changed from toolSubCategoryId
+  toolSubCategoryId?: string; 
 
   @ApiPropertyOptional({ example: true, type: Boolean })
   @IsOptional()
-  @Transform(({ value }) => value === 'true' || value === true)
+  @Transform(({ value }) => value == 'true' || value == true)
   @IsBoolean()
   isActive?: boolean;
 

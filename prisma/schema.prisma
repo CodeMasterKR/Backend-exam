@@ -80,13 +80,13 @@ model Order {
   withDelivery      Boolean
   status            String
   commentToDelivery String?
-  comments          Comment[]
+  isCompleted       Boolean
 }
 
 model Comment {
   id        String   @id @default(uuid())
-  orderId   String
-  order     Order    @relation(fields: [orderId], references: [id])
+  masterId  String
+  master    Master   @relation(fields: [masterId], references: [id])
   stars     Int
   createdAt DateTime @default(now())
   userId    String
@@ -94,28 +94,36 @@ model Comment {
 }
 
 model Cart {
-  id               String         @id @default(uuid())
-  createdAt        DateTime       @default(now())
-  userId           String
-  user             User           @relation(fields: [userId], references: [id])
-  isCompleted      Boolean        @default(false)
-  masterCategoryId String
-  masterCategory   MasterCategory @relation(fields: [masterCategoryId], references: [id])
-  orders           Order[]
-  cartItems        CartItem[]
+  id                 String               @id @default(uuid())
+  createdAt          DateTime             @default(now())
+  userId             String
+  user               User                 @relation(fields: [userId], references: [id])
+  isCompleted        Boolean              @default(false)
+  orders             Order[]
+  toolItem           toolItem[]
+  masterCategoryItem masterCategoryItem[]
 }
 
-model CartItem {
-  id     String @id @default(uuid())
-  cartId String
-  cart   Cart   @relation(fields: [cartId], references: [id])
-  toolId String
-  tool   Tool   @relation(fields: [toolId], references: [id])
-  count  Int
+model toolItem {
+  id              String        @id @default(uuid())
+  cartId          String
+  cart            Cart          @relation(fields: [cartId], references: [id])
+  toolAttributeId String
+  toolAttribute   toolAttribute @relation(fields: [toolAttributeId], references: [id])
+  count           Int
+}
+
+model masterCategoryItem {
+  id      String @id @default(uuid())
+  cartId  String
+  cart    Cart   @relation(fields: [cartId], references: [id])
+  levelId String
+  level   Level  @relation(fields: [levelId], references: [id])
+  count   Int
 }
 
 model Tool {
-  id                String       @id @default(uuid())
+  id                String          @id @default(uuid())
   name_uz           String
   name_en           String
   name_ru           String
@@ -125,33 +133,40 @@ model Tool {
   price             Float
   quantity          Int
   brand             String?
-  isActive          Boolean      @default(true)
+  isActive          Boolean         @default(true)
   image             String?
   toolSubCategoryId String
-  toolSubCategory   ToolCategory @relation(fields: [toolSubCategoryId], references: [id])
+  toolSubCategory   ToolCategory    @relation(fields: [toolSubCategoryId], references: [id])
   toolReviewId      String?
-  cartItems         CartItem[]
-  attributes        Attribute[]
+  toolAttribute     toolAttribute[]
 }
 
 model ToolCategory {
-  id               String         @id @default(uuid())
-  name_uz          String
-  name_en          String
-  name_ru          String
-  desc_uz          String?
-  desc_en          String?
-  desc_ru          String?
-  icon             String?
-  tools            Tool[]
+  id      String  @id @default(uuid())
+  name_uz String
+  name_en String
+  name_ru String
+  desc_uz String?
+  desc_en String?
+  desc_ru String?
+  icon    String?
+  tools   Tool[]
+}
+
+model toolAttribute {
+  id          String     @id @default(uuid())
+  toolId      String
+  tool        Tool       @relation(fields: [toolId], references: [id])
+  attributeId String
+  attribute   Attribute  @relation(fields: [attributeId], references: [id])
+  value       String
+  toolItem    toolItem[]
 }
 
 model Attribute {
-  id          String @id @default(uuid())
-  productId   String
-  product     Tool   @relation(fields: [productId], references: [id])
-  attributeId String
-  value       String
+  id            String          @id @default(uuid())
+  name          String
+  toolAttribute toolAttribute[]
 }
 
 model Master {
@@ -166,6 +181,7 @@ model Master {
   star          Float?
   about         String
   MasterService MasterService[]
+  Comment       Comment[]
 }
 
 model MasterService {
@@ -188,16 +204,16 @@ model MasterCategory {
   icon                  String
   minWorkingHourlyPrice Float
   minPriceDaily         Float
-  carts                 Cart[]
   MasterService         MasterService[]
   Level                 Level[]
 }
 
 model Level {
-  id               String         @id @default(uuid())
-  name_uz          String
-  name_en          String
-  name_ru          String
-  masterCategoryId String?
-  masterCategory   MasterCategory? @relation(fields: [masterCategoryId], references: [id])
+  id                 String               @id @default(uuid())
+  name_uz            String
+  name_en            String
+  name_ru            String
+  masterCategoryId   String?
+  masterCategory     MasterCategory?      @relation(fields: [masterCategoryId], references: [id])
+  masterCategoryItem masterCategoryItem[]
 }

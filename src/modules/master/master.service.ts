@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../config/prisma/prisma.service'; // PrismaService joylashuviga moslang
+import { PrismaService } from '../../config/prisma/prisma.service'; 
 import { CreateMasterDto } from './dto/create-master.dto';
 import { UpdateMasterDto } from './dto/update-master.dto';
 import { QueryMasterDto } from './dto/query-master.dto';
-import { Master, Prisma } from '@prisma/client'; // Prisma modelini import qilish
+import { Master, Prisma } from '@prisma/client'; 
 
 @Injectable()
 export class MasterService {
@@ -14,15 +14,10 @@ export class MasterService {
       return await this.prisma.master.create({
         data: {
           ...createMasterDto,
-          // isActive DTOda ixtiyoriy, lekin modelda shart emas, default bor
-          // dateBirth stringdan Date ga o'tkaziladi (agar class-transformer ishlatilmasa)
-          // dateBirth: new Date(createMasterDto.dateBirth), // Agar DTOda string bo'lsa
         },
       });
     } catch (error) {
-      // Xatoliklarni qayta ishlash (masalan, unique constraint)
-      // Loggerdan foydalanish mumkin
-      throw error; // Yoki o'zgartirilgan xatolik
+      throw error;
     }
   }
 
@@ -35,27 +30,25 @@ export class MasterService {
 
     if (search) {
       where.OR = [
-        { fullName: { contains: search, mode: 'insensitive' } }, // Case-insensitive qidiruv
+        { fullName: { contains: search, mode: 'insensitive' } }, 
         { phone: { contains: search } },
         { about: { contains: search, mode: 'insensitive' } },
       ];
     }
 
-    if (isActive !== undefined) { // null yoki undefined emasligini tekshirish
+    if (isActive !== undefined) { 
         where.isActive = isActive;
     }
 
 
     const orderBy: Prisma.MasterOrderByWithRelationInput = {};
     if (sortBy && sortOrder) {
-       // star ixtiyoriy bo'lgani uchun alohida tekshirish
-       if (sortBy === 'star') {
-           orderBy[sortBy] = { sort: sortOrder, nulls: sortOrder === 'asc' ? 'first' : 'last' }; // null qiymatlarni boshiga yoki oxiriga qo'yish
+       if (sortBy == 'star') {
+           orderBy[sortBy] = { sort: sortOrder, nulls: sortOrder == 'asc' ? 'first' : 'last' }; 
        } else {
            orderBy[sortBy] = sortOrder;
        }
     } else {
-      // Default saralash
       orderBy.fullName = 'asc';
     }
 
@@ -66,7 +59,6 @@ export class MasterService {
         skip,
         take,
         orderBy,
-        // include: { MasterService: true } // Agar bog'liq ma'lumotlar kerak bo'lsa
       });
 
       const totalMasters = await this.prisma.master.count({ where });
@@ -83,7 +75,6 @@ export class MasterService {
         },
       };
     } catch (error) {
-      // Loggerdan foydalanish mumkin
       throw error;
     }
   }
@@ -91,7 +82,6 @@ export class MasterService {
   async findOne(id: string): Promise<Master> {
     const master = await this.prisma.master.findUnique({
       where: { id },
-      // include: { MasterService: true } // Agar bog'liq ma'lumotlar kerak bo'lsa
     });
 
     if (!master) {
@@ -101,21 +91,17 @@ export class MasterService {
   }
 
   async update(id: string, updateMasterDto: UpdateMasterDto): Promise<Master> {
-    // Avval master mavjudligini tekshiramiz
-    await this.findOne(id); // Agar topilmasa, NotFoundException tashlaydi
+    await this.findOne(id); 
 
     try {
       return await this.prisma.master.update({
         where: { id },
         data: {
           ...updateMasterDto,
-          // dateBirth ni yangilashda stringdan Date ga o'tkazish kerak bo'lishi mumkin
-          // dateBirth: updateMasterDto.dateBirth ? new Date(updateMasterDto.dateBirth) : undefined,
         },
       });
     } catch (error) {
-        // Masalan, P2025 xatoligi (update qilinayotgan yozuv topilmasa)
-       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2025') {
            throw new NotFoundException(`ID '${id}' boʻlgan Master topilmadi`);
        }
       throw error;
@@ -123,8 +109,7 @@ export class MasterService {
   }
 
   async remove(id: string): Promise<string> {
-     // Avval master mavjudligini tekshiramiz
-     await this.findOne(id); // Agar topilmasa, NotFoundException tashlaydi
+     await this.findOne(id); 
 
     try {
         await this.prisma.master.delete({
@@ -132,8 +117,7 @@ export class MasterService {
         });
         return "Master was deleted successfully!"
     } catch (error) {
-         // Masalan, P2025 xatoligi (o'chirilayotgan yozuv topilmasa)
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2025') {
            throw new NotFoundException(`ID '${id}' boʻlgan Master topilmadi`);
         }
         throw error;

@@ -36,7 +36,7 @@ export class QueryLevelDto {
   @ApiPropertyOptional({
     description: 'Field to sort by',
     example: 'name_en',
-    default: 'name_en', // Yoki 'id'
+    default: 'name_en', 
   })
   @IsOptional()
   @IsString()
@@ -53,7 +53,7 @@ export class QueryLevelDto {
 
   @ApiPropertyOptional({
     description: 'Filter by MasterCategory ID',
-    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    example: 'uuid',
   })
   @IsOptional()
   @IsUUID()

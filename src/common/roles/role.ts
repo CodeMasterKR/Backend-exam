@@ -1,0 +1,7 @@
+enum userRole {
+  ADMIN,
+  SUPERADMIN,
+  VIEWERADMIN,
+  JISMONIY,
+  YURIDIK,
+}

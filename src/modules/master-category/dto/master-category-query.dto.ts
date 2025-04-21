@@ -6,7 +6,6 @@ import {
   IsString,
   Min,
   IsIn,
-  // IsUUID, // toolId uchun agar UUID bo'lsa
 } from 'class-validator';
 
 export class MasterCategoryQueryDto {

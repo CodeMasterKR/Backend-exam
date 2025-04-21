@@ -4,13 +4,11 @@ import {
   IsNotEmpty,
   IsPhoneNumber,
   IsBoolean,
-  IsDateString,
   IsInt,
   Min,
   IsOptional,
   IsNumber,
   Max,
-  IsUrl, // Agar image/passportImage URL bo'lsa
 } from 'class-validator';
 
 export class CreateMasterDto {
@@ -23,10 +21,10 @@ export class CreateMasterDto {
   fullName: string;
 
   @ApiProperty({
-    example: '+998901234567',
+    example: '+998945895766',
     description: 'Masterning telefon raqami (xalqaro formatda)',
   })
-  @IsPhoneNumber() // Mintaqangizga mos validatsiyani tanlang
+  @IsPhoneNumber() 
   @IsNotEmpty()
   phone: string;
 
@@ -40,11 +38,11 @@ export class CreateMasterDto {
   isActive?: boolean;
 
   @ApiProperty({
-    example: '1990-05-15T00:00:00.000Z',
+    example: '2003-09-10',
     description: 'Masterning tugʻilgan sanasi (ISO 8601 formatida)',
   })
   @IsNotEmpty()
-  dateBirth: string; // Prisma DateTime ni qabul qiladi
+  dateBirth: string; 
 
   @ApiProperty({ example: 5, description: 'Masterning ish tajribasi (yillarda)' })
   @IsInt()
@@ -56,7 +54,7 @@ export class CreateMasterDto {
     example: 'https://example.com/images/master.jpg',
     description: 'Master rasmining URL manzili',
   })
-  @IsString() // Yoki @IsUrl() agar URL bo'lishi shart bo'lsa
+  @IsString() 
   @IsNotEmpty()
   image: string;
 
@@ -64,7 +62,7 @@ export class CreateMasterDto {
     example: 'https://example.com/images/passport.jpg',
     description: 'Master pasport rasmining URL manzili',
   })
-  @IsString() // Yoki @IsUrl()
+  @IsString() 
   @IsNotEmpty()
   passportImage: string;
 

@@ -74,7 +74,7 @@ export class RegisterDto {
     pattern: '^[0-9]{9}$',
   })
   @IsOptional()
-  @ValidateIf(o => o.userRole === userRole.YURIDIK)
+  @ValidateIf(o => o.userRole == userRole.YURIDIK)
   @IsNotEmpty({ message: "Yuridik shaxs uchun STIR (INN) kiritilishi shart" })
   @Length(9, 9, { message: "STIR (INN) uzunligi 9 ta raqam bo'lishi kerak" })
   @Matches(/^[0-9]{9}$/, { message: "STIR (INN) faqat raqamlardan iborat bo'lishi kerak" })
@@ -90,7 +90,7 @@ export class RegisterDto {
     pattern: '^[0-9]{5}$',
   })
   @IsOptional()
-  @ValidateIf(o => o.userRole === userRole.YURIDIK)
+  @ValidateIf(o => o.userRole == userRole.YURIDIK)
   @IsNotEmpty({ message: "Yuridik shaxs uchun Bank kodi (MFO) kiritilishi shart" })
   @Length(5, 5, { message: "Bank kodi (MFO) uzunligi 5 ta raqam bo'lishi kerak" })
   @Matches(/^[0-9]{5}$/, { message: "Bank kodi (MFO) faqat raqamlardan iborat bo'lishi kerak" })
@@ -106,7 +106,7 @@ export class RegisterDto {
     pattern: '^[0-9]{20}$',
   })
   @IsOptional()
-  @ValidateIf(o => o.userRole === userRole.YURIDIK)
+  @ValidateIf(o => o.userRole == userRole.YURIDIK)
   @IsNotEmpty({ message: "Yuridik shaxs uchun Bank hisob raqami kiritilishi shart" })
   @Length(20, 20, { message: "Bank hisob raqami uzunligi 20 ta raqam bo'lishi kerak" })
   @Matches(/^[0-9]{20}$/, { message: "Bank hisob raqami faqat raqamlardan iborat bo'lishi kerak" })
@@ -119,7 +119,7 @@ export class RegisterDto {
     required: false,
   })
   @IsOptional()
-  @ValidateIf(o => o.userRole === userRole.YURIDIK)
+  @ValidateIf(o => o.userRole == userRole.YURIDIK)
   @IsNotEmpty({ message: "Yuridik shaxs uchun Bank nomi kiritilishi shart" })
   @IsString()
   bankName?: string;
@@ -130,7 +130,7 @@ export class RegisterDto {
     required: false,
   })
   @IsOptional()
-  @ValidateIf(o => o.userRole === userRole.YURIDIK || o.economicActivityCode)
+  @ValidateIf(o => o.userRole == userRole.YURIDIK || o.economicActivityCode)
   @IsString({ message: "Iqtisodiy faoliyat kodi (IFUT) matn bo'lishi kerak" })
   economicActivityCode?: string;
 }

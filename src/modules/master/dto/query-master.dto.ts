@@ -18,7 +18,7 @@ export class QueryMasterDto {
     example: 1,
   })
   @IsOptional()
-  @Type(() => Number) // Query parametri string bo'lgani uchun Numberga o'tkazamiz
+  @Type(() => Number) 
   @IsInt()
   @Min(1)
   page?: number = 1;
@@ -34,18 +34,18 @@ export class QueryMasterDto {
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  @Max(100) // Server yuklamasini cheklash uchun maximum qo'yamiz
+  @Max(100) 
   limit?: number = 10;
 
   @ApiPropertyOptional({
     description: 'Saralash maydoni',
-    enum: ['fullName', 'experience', 'star', 'dateBirth', 'createdAt'], // createdAt qo'shilishi mumkin
+    enum: ['fullName', 'experience', 'star', 'dateBirth', 'createdAt'], 
     default: 'fullName',
     example: 'experience',
   })
   @IsOptional()
   @IsString()
-  @IsIn(['fullName', 'experience', 'star', 'dateBirth', 'createdAt']) // Ruxsat etilgan maydonlar
+  @IsIn(['fullName', 'experience', 'star', 'dateBirth', 'createdAt']) 
   sortBy?: string = 'fullName';
 
   @ApiPropertyOptional({
@@ -65,7 +65,7 @@ export class QueryMasterDto {
     type: Boolean
   })
   @IsOptional()
-  @Type(() => Boolean) // Query parametri 'true'/'false' string bo'lishi mumkin
+  @Type(() => Boolean) 
   @IsBoolean()
   isActive?: boolean;
 }

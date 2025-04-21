@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
   BadRequestException,
 } from '@nestjs/common';
-import { PrismaService } from '../../config/prisma/prisma.service'; // PrismaService manzilingizni moslang
+import { PrismaService } from '../../config/prisma/prisma.service'; 
 import { CreateLevelDto } from './dto/create-level.dto';
 import { UpdateLevelDto } from './dto/update-level.dto';
 import { QueryLevelDto } from './dto/query-level.dto';
@@ -18,7 +18,7 @@ export class LevelService {
       try {
           const category = await this.prisma.masterCategory.findUnique({
               where: { id },
-              select: { id: true } // Faqat id ni olish kifoya
+              select: { id: true }
           });
           if (!category) {
                throw new BadRequestException(`MasterCategory with ID ${id} not found.`);
@@ -26,7 +26,6 @@ export class LevelService {
       } catch (error) {
            if (error instanceof BadRequestException) throw error;
            console.error("Error checking MasterCategory existence:", error);
-           // Agar DB xatosi bo'lsa yoki boshqa kutilmagan xato
            throw new InternalServerErrorException(`Could not verify MasterCategory with ID ${id}.`);
       }
   }
@@ -34,7 +33,6 @@ export class LevelService {
   async create(createLevelDto: CreateLevelDto): Promise<Level> {
     const { masterCategoryId, ...levelData } = createLevelDto;
 
-    // Bog'liq MasterCategory mavjudligini tekshirish (ixtiyoriy, lekin yaxshi amaliyot)
     await this.checkMasterCategoryExists(masterCategoryId);
 
     try {
@@ -46,24 +44,22 @@ export class LevelService {
           },
         },
         include: {
-          masterCategory: { // Bog'liq kategoriyani qaytarish
-            select: { id: true, name_en: true, name_uz: true, name_ru: true } // Kerakli maydonlar
+          masterCategory: { 
+            select: { id: true, name_en: true, name_uz: true, name_ru: true } 
           }
         },
       });
     } catch (error) {
       console.error('Error creating Level:', error);
        if (error instanceof Prisma.PrismaClientKnownRequestError) {
-           // P2003: Foreign key constraint failed
-           if (error.code === 'P2003') {
+           if (error.code == 'P2003') {
                 throw new BadRequestException(`Invalid masterCategoryId provided: ${masterCategoryId}.`);
            }
-            // P2025: An operation failed because it depends on one or more records that were required but not found. (connect uchun)
-           if (error.code === 'P2025') {
+           if (error.code == 'P2025') {
                throw new BadRequestException(`MasterCategory with ID ${masterCategoryId} not found.`);
            }
        }
-       if (error instanceof BadRequestException) throw error; // checkMasterCategoryExists dan kelgan xato
+       if (error instanceof BadRequestException) throw error; 
       throw new InternalServerErrorException('Could not create level.');
     }
   }
@@ -138,7 +134,7 @@ export class LevelService {
         });
          return level;
     } catch (error) {
-         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+         if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2025') {
              throw new NotFoundException(`Level with ID ${id} not found.`);
          }
          console.error(`Error fetching level with ID ${id}:`, error);
@@ -147,12 +143,10 @@ export class LevelService {
   }
 
   async update(id: string, updateLevelDto: UpdateLevelDto): Promise<Level> {
-    // Yozuv mavjudligini tekshirish
-    await this.findOne(id); // Agar topilmasa NotFoundException yuboradi
+    await this.findOne(id); 
 
     const { masterCategoryId, ...levelData } = updateLevelDto;
 
-    // Agar masterCategoryId o'zgartirilayotgan bo'lsa, uning mavjudligini tekshirish
     if (masterCategoryId) {
         await this.checkMasterCategoryExists(masterCategoryId);
     }
@@ -175,24 +169,21 @@ export class LevelService {
     } catch (error) {
       console.error(`Error updating level with ID ${id}:`, error);
         if (error instanceof Prisma.PrismaClientKnownRequestError) {
-            // P2025: Record to update not found yoki connect qilinayotgan record topilmadi
-             if (error.code === 'P2025') {
+             if (error.code == 'P2025') {
                  throw new NotFoundException(`Level with ID ${id} or related MasterCategory not found for update.`);
             }
-             // P2003: Foreign key constraint failed (connect uchun)
-             if (error.code === 'P2003') {
+             if (error.code == 'P2003') {
                  throw new BadRequestException(`Invalid masterCategoryId provided for update: ${masterCategoryId}.`);
             }
         }
-        if (error instanceof BadRequestException) throw error; // checkMasterCategoryExists dan
-        if (error instanceof NotFoundException) throw error; // findOne dan
+        if (error instanceof BadRequestException) throw error;
+        if (error instanceof NotFoundException) throw error; 
       throw new InternalServerErrorException('Could not update level.');
     }
   }
 
   async remove(id: string): Promise<void> {
-    // Yozuv mavjudligini tekshirish
-    await this.findOne(id); // Agar topilmasa NotFoundException yuboradi
+    await this.findOne(id); 
 
     try {
       await this.prisma.level.delete({
@@ -200,11 +191,10 @@ export class LevelService {
       });
     } catch (error) {
       console.error(`Error deleting level with ID ${id}:`, error);
-       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
-            // Garchi findOne tekshirgan bo'lsa ham, xavfsizlik uchun
+       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2025') {
             throw new NotFoundException(`Level with ID ${id} not found for deletion.`);
        }
-       if (error instanceof NotFoundException) throw error; // findOne dan
+       if (error instanceof NotFoundException) throw error;
       throw new InternalServerErrorException('Could not delete level.');
     }
   }

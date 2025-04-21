@@ -23,13 +23,14 @@ import {
   ApiQuery,
   ApiParam,
   ApiBody,
-  ApiBearerAuth, // JWT uchun
+  ApiBearerAuth, 
   ApiOkResponse,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard'; // Guard manzilingizni moslang
-import { MasterService as MasterServiceModel } from '@prisma/client'; // Qaytariladigan model uchun
+import { JwtAuthGuard } from '../guards/jwt-auth.guard'; 
+import { MasterService as MasterServiceModel, userRole } from '@prisma/client';
+import { Roles } from '../guards/roles.decorator';
+import { RolesGuard } from '../guards/roles.guard';
 
-// Swagger uchun DTO Examplelar
 const createExample = {
   masterCategoryId: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
   masterId: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
@@ -44,17 +45,18 @@ const updateExample = {
   experience: 5,
 };
 
-@ApiTags('Master Services') // Swagger UI dagi guruh nomi
-@ApiBearerAuth() // Barcha endpointlar uchun JWT belgisini qo'shish
-@Controller('master-services') // Endpoint manzili
+@ApiTags('Master Services') 
+@ApiBearerAuth() 
+@Controller('master-services') 
+@Roles(userRole.ADMIN, userRole.SUPERADMIN)
 export class MasterServiceController {
   constructor(private readonly masterServiceService: MasterServiceService) {}
 
   @Post()
-  @UseGuards(JwtAuthGuard) // Bu endpoint uchun JWT tekshiruvini yoqish
+  @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a new Master Service relation' })
   @ApiBody({ type: CreateMasterServiceDto, examples: { default: { value: createExample } } })
-  @ApiResponse({ status: 201, description: 'Successfully created.', type: CreateMasterServiceDto /* Yoki qaytariladigan to'liq model */ })
+  @ApiResponse({ status: 201, description: 'Successfully created.', type: CreateMasterServiceDto })
   @ApiResponse({ status: 400, description: 'Bad Request (Validation failed, Price constraint violated, etc.)' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   async create(@Body() createMasterServiceDto: CreateMasterServiceDto) {
@@ -64,7 +66,6 @@ export class MasterServiceController {
   @Get()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get all Master Services with pagination, sorting, and filtering' })
-  // Swagger query parametrlarini dokumentatsiyalash
   @ApiQuery({ name: 'page', required: false, type: Number, description: 'Page number' })
   @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Items per page' })
   @ApiQuery({ name: 'sortBy', required: false, type: String, description: 'Field to sort by (e.g., priceHourly, experience)' })
@@ -72,14 +73,13 @@ export class MasterServiceController {
   @ApiQuery({ name: 'search', required: false, type: String, description: 'Search term (not fully implemented)' })
   @ApiQuery({ name: 'masterId', required: false, type: String, format: 'uuid', description: 'Filter by Master ID' })
   @ApiQuery({ name: 'masterCategoryId', required: false, type: String, format: 'uuid', description: 'Filter by MasterCategory ID' })
-  @ApiOkResponse({ // Muvaffaqiyatli javobni batafsil tavsiflash
+  @ApiOkResponse({
     description: 'List of master services with pagination.',
-    // Javob strukturasini ko'rsatish uchun sxema (yoki tip)
     schema: {
         properties: {
             data: {
                 type: 'array',
-                items: { $ref: '#/components/schemas/MasterService' } // Agar MasterService schema mavjud bo'lsa
+                items: { $ref: '#/components/schemas/MasterService' } 
             },
             total: { type: 'number', example: 100 },
             page: { type: 'number', example: 1 },
@@ -96,7 +96,7 @@ export class MasterServiceController {
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Get a single Master Service by ID' })
   @ApiParam({ name: 'id', required: true, description: 'Master Service ID', type: String, format: 'uuid' })
-  @ApiResponse({ status: 200, description: 'The found record.', type: CreateMasterServiceDto /* Yoki qaytariladigan to'liq model */ })
+  @ApiResponse({ status: 200, description: 'The found record.', type: CreateMasterServiceDto })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   findOne(@Param('id', ParseUUIDPipe) id: string) {
@@ -108,7 +108,7 @@ export class MasterServiceController {
   @ApiOperation({ summary: 'Update a Master Service by ID' })
   @ApiParam({ name: 'id', required: true, description: 'Master Service ID', type: String, format: 'uuid' })
   @ApiBody({ type: UpdateMasterServiceDto, examples: { default: { value: updateExample } } })
-  @ApiResponse({ status: 200, description: 'Successfully updated.', type: CreateMasterServiceDto /* Yoki qaytariladigan to'liq model */ })
+  @ApiResponse({ status: 200, description: 'Successfully updated.', type: CreateMasterServiceDto})
   @ApiResponse({ status: 400, description: 'Bad Request (Validation failed, Price constraint violated, etc.)' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -126,13 +126,8 @@ export class MasterServiceController {
   @ApiResponse({ status: 204, description: 'Successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @HttpCode(HttpStatus.NO_CONTENT) // DELETE uchun standart status kodi
+  @HttpCode(HttpStatus.NO_CONTENT) 
   remove(@Param('id', ParseUUIDPipe) id: string) {
     return this.masterServiceService.remove(id);
   }
 }
-
-// Agar Swagger schemasini aniqroq qilish uchun kerak bo'lsa:
-// Prisma modelini Swagger schemaga aylantiradigan kutubxonalardan foydalanishingiz
-// yoki ApiOkResponse/ApiResponse da schemani qo'lda tavsiflashingiz mumkin.
-// @ApiOkResponse({ type: MasterServiceModel }) // Bu ishlashi uchun sozlash kerak bo'lishi mumkin

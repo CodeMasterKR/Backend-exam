@@ -38,7 +38,7 @@ export class RegionService {
         name: name ? { contains: name, mode: 'insensitive' } : undefined,
       },
       orderBy: {
-        [sortBy || 'createdAt']: order === 'desc' ? 'desc' : 'asc',
+        [sortBy || 'createdAt']: order == 'desc' ? 'desc' : 'asc',
       },
       take: limit,
       skip: offset,

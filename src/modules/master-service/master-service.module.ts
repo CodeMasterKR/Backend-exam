@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { MasterServiceService } from './master-service.service';
 import { MasterServiceController } from './master-service.controller';
-import { PrismaModule } from '../../config/prisma/prisma.module'; // PrismaModule manzilingizni moslang
-import { AuthModule } from '../auth/auth.module'; // AuthModule manzilingizni moslang (JWT Guard uchun)
+import { PrismaModule } from '../../config/prisma/prisma.module';
+import { AuthModule } from '../auth/auth.module'; 
 
 @Module({
   imports: [
@@ -11,6 +11,6 @@ import { AuthModule } from '../auth/auth.module'; // AuthModule manzilingizni mo
   ],
   controllers: [MasterServiceController],
   providers: [MasterServiceService],
-  exports: [MasterServiceService], // Agar boshqa modullar bu servisni ishlatsa
+  exports: [MasterServiceService], 
 })
 export class MasterServiceModule {}

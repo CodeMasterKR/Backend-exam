@@ -26,7 +26,7 @@ export class MasterCategoryService {
       return newCategory;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
+        if (error.code == 'P2002') {
           throw new ConflictException(
             `Kategoriya yaratilmadi: ${error.meta?.target} maydoni bo'yicha takrorlanish.`,
           );
@@ -99,7 +99,7 @@ export class MasterCategoryService {
       });
       return category;
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2025') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2025') {
         throw new NotFoundException(`ID '${id}' ga ega master kategoriya topilmadi.`);
       }
       throw new InternalServerErrorException('Kategoriyani topishda kutilmagan xatolik.');
@@ -121,12 +121,12 @@ export class MasterCategoryService {
       return updatedCategory;
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
+        if (error.code == 'P2002') {
           throw new ConflictException(
             `Kategoriya yangilanmadi: ${error.meta?.target} maydoni bo'yicha takrorlanish.`,
           );
         }
-        if (error.code === 'P2025') {
+        if (error.code == 'P2025') {
             throw new NotFoundException(`ID '${id}' ga ega kategoriya yangilash uchun topilmadi.`);
         }
       }
@@ -144,12 +144,12 @@ export class MasterCategoryService {
       return "MasterCategory was deleted successfully!";
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2003' || error.code === 'P2014') {
+        if (error.code == 'P2003' || error.code == 'P2014') {
            throw new ConflictException(
                 `ID '${id}' ga ega kategoriyani o'chirib bo'lmadi, chunki u boshqa yozuvlar bilan bog'langan (${error.meta?.field_name}).`,
             );
         }
-         if (error.code === 'P2025') {
+         if (error.code == 'P2025') {
             throw new NotFoundException(`ID '${id}' ga ega kategoriya o'chirish uchun topilmadi.`);
         }
       }

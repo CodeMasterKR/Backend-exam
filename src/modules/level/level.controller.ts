@@ -27,15 +27,15 @@ import {
   ApiOkResponse,
   ApiProperty,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard'; // Guard manzilingizni moslang
-import { Level as LevelModel } from '@prisma/client'; // Javob turi uchun
+import { JwtAuthGuard } from '../guards/jwt-auth.guard'; 
+import { RolesGuard } from '../guards/roles.guard';
+import { Level as LevelModel, userRole } from '@prisma/client'; 
 
-// Swagger uchun DTO Examplelar
 const createLevelExample = {
   name_uz: "Tajribali",
   name_en: "Experienced",
   name_ru: "Опытный",
-  masterCategoryId: "f47ac10b-58cc-4372-a567-0e02b2c3d479"
+  masterCategoryId: "uuid"
 };
 
 const updateLevelExample = {
@@ -43,11 +43,11 @@ const updateLevelExample = {
 };
 
 
-import { MasterCategory as MasterCategoryModel } from '@prisma/client'; // Agar MasterCategory uchun ham schema kerak bo'lsa
+import { MasterCategory as MasterCategoryModel } from '@prisma/client'; 
+import { Roles } from '../guards/roles.decorator';
 
-// Agar MasterCategory uchun alohida DTO/Schema bo'lmasa, shu yerda oddiy schema yaratish mumkin
 class MasterCategoryBasicInfo {
-    @ApiProperty({ example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479'})
+    @ApiProperty({ example: 'uuid'})
     id: string;
      @ApiProperty({ example: 'Electrician'})
     name_en: string;
@@ -57,28 +57,26 @@ class MasterCategoryBasicInfo {
     name_ru: string;
 }
 
-class LevelResponse extends CreateLevelDto { // CreateLevelDto dan meros olish qulay
-  @ApiProperty({ example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef' })
+class LevelResponse extends CreateLevelDto { 
+  @ApiProperty({ example: 'uuid' })
   id: string;
 
-  // masterCategoryId DTO da bor, lekin javobda to'liq Category ni ko'rsatish yaxshi
-  @ApiProperty({ type: () => MasterCategoryBasicInfo }) // Javobda bog'liq obyektni ko'rsatish
+  @ApiProperty({ type: () => MasterCategoryBasicInfo }) 
   masterCategory: MasterCategoryBasicInfo;
 }
-// --- End Swagger Schema Definition ---
 
-
-@ApiTags('Levels') // Swagger UI guruh nomi
-@ApiBearerAuth()   // JWT avtorizatsiyasi
-@Controller('levels') // Endpoint manzili
+@ApiTags('Levels') 
+@ApiBearerAuth()   
+@Controller('levels') 
 export class LevelController {
   constructor(private readonly levelService: LevelService) {}
 
+  @Roles(userRole.ADMIN, userRole.SUPERADMIN)
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a new Level' })
   @ApiBody({ type: CreateLevelDto, examples: { default: { value: createLevelExample } } })
-  @ApiResponse({ status: 201, description: 'Successfully created.', type: LevelResponse }) // Javob schemasini ko'rsatish
+  @ApiResponse({ status: 201, description: 'Successfully created.', type: LevelResponse }) 
   @ApiResponse({ status: 400, description: 'Bad Request (Validation failed, Invalid masterCategoryId)' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
   create(@Body() createLevelDto: CreateLevelDto): Promise<LevelModel> {
@@ -100,7 +98,7 @@ export class LevelController {
         properties: {
             data: {
                 type: 'array',
-                items: { $ref: '#/components/schemas/LevelResponse' } // Yuqorida yaratilgan schema
+                items: { $ref: '#/components/schemas/LevelResponse' } 
             },
             total: { type: 'number', example: 50 },
             page: { type: 'number', example: 1 },
@@ -124,6 +122,8 @@ export class LevelController {
     return this.levelService.findOne(id);
   }
 
+
+  @Roles(userRole.ADMIN, userRole.SUPERADMIN)
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update a Level by ID' })
@@ -140,6 +140,8 @@ export class LevelController {
     return this.levelService.update(id, updateLevelDto);
   }
 
+
+  @Roles(userRole.ADMIN, userRole.SUPERADMIN)
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Delete a Level by ID' })
@@ -147,7 +149,7 @@ export class LevelController {
   @ApiResponse({ status: 204, description: 'Successfully deleted.' })
   @ApiResponse({ status: 404, description: 'Not Found' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
-  @HttpCode(HttpStatus.NO_CONTENT) // Javob qaytarmaydi
+  @HttpCode(HttpStatus.NO_CONTENT) 
   remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.levelService.remove(id);
   }

@@ -29,22 +29,22 @@ export class ToolService {
   }
 
   async create(createDto: CreateToolDto): Promise<Tool> {
-    const { toolSubCategoryId, ...toolData } = createDto; // Changed variable name
+    const { toolSubCategoryId, ...toolData } = createDto; 
     await this.validateCategory(toolSubCategoryId);
 
     try {
       return await this.prisma.tool.create({
         data: {
           ...toolData,
-          toolSubCategory: { // Changed relation name
+          toolSubCategory: {
             connect: { id: toolSubCategoryId },
           },
         },
-        include: { toolSubCategory: true } // Changed relation name
+        include: { toolSubCategory: true } 
       });
     } catch (error) {
-       if (error instanceof Prisma.PrismaClientKnownRequestError && (error.code === 'P2025' || error.code === 'P2003')) {
-          throw new BadRequestException(`Invalid toolSubCategoryId: ${toolSubCategoryId}.`); // Changed field name
+       if (error instanceof Prisma.PrismaClientKnownRequestError && (error.code == 'P2025' || error.code == 'P2003')) {
+          throw new BadRequestException(`Invalid toolSubCategoryId: ${toolSubCategoryId}.`); 
        }
        console.error('Error creating Tool:', error);
       throw new InternalServerErrorException('Could not create tool.');
@@ -63,7 +63,7 @@ export class ToolService {
       sortBy = 'name_en',
       sortOrder = 'asc',
       search,
-      toolSubCategoryId, // Changed variable name
+      toolSubCategoryId,
       isActive,
       brand,
     } = queryDto;
@@ -71,13 +71,13 @@ export class ToolService {
     const skip = (page - 1) * limit;
     const where: Prisma.ToolWhereInput = {};
 
-    if (toolSubCategoryId) { // Changed field name
-      where.toolSubCategoryId = toolSubCategoryId; // Changed field name
+    if (toolSubCategoryId) {
+      where.toolSubCategoryId = toolSubCategoryId;
     }
     if (isActive !== undefined) {
       where.isActive = isActive;
     }
-     if (brand) {
+    if (brand) {
       where.brand = { contains: brand, mode: 'insensitive'};
     }
 
@@ -101,8 +101,12 @@ export class ToolService {
           take: limit,
           orderBy: { [sortBy]: sortOrder },
           include: {
-            toolSubCategory: { select: { id: true, name_en: true } }, // Changed relation name
-            _count: { select: { cartItems: true, attributes: true } }
+            toolSubCategory: { select: { id: true, name_en: true } },
+            _count: {
+              select: {
+                toolAttribute: true 
+              }
+            }
           },
         }),
         this.prisma.tool.count({ where }),
@@ -114,13 +118,17 @@ export class ToolService {
     }
   }
 
+
   async findOne(id: string): Promise<Tool> {
     const tool = await this.prisma.tool.findUnique({
       where: { id },
       include: {
-          toolSubCategory: true, // Changed relation name
-          attributes: true, // Include attributes in detail view if needed
-          _count: { select: { cartItems: true } }
+          toolSubCategory: true,
+          toolAttribute: {        
+              include: {
+                  attribute: true 
+              }
+          },
       }
     });
 
@@ -131,11 +139,11 @@ export class ToolService {
   }
 
   async update(id: string, updateDto: UpdateToolDto): Promise<Tool> {
-    const { toolSubCategoryId, ...toolData } = updateDto; // Changed variable name
+    const { toolSubCategoryId, ...toolData } = updateDto; 
     await this.findOne(id);
 
-    if (toolSubCategoryId) { // Changed variable name
-      await this.validateCategory(toolSubCategoryId); // Changed variable name
+    if (toolSubCategoryId) {
+      await this.validateCategory(toolSubCategoryId); 
     }
 
     try {
@@ -143,15 +151,15 @@ export class ToolService {
         where: { id },
         data: {
           ...toolData,
-          toolSubCategory: toolSubCategoryId // Changed relation name
-            ? { connect: { id: toolSubCategoryId } } // Changed field name
+          toolSubCategory: toolSubCategoryId 
+            ? { connect: { id: toolSubCategoryId } } 
             : undefined,
         },
-         include: { toolSubCategory: true } // Changed relation name
+         include: { toolSubCategory: true } 
       });
     } catch (error) {
-        if (error instanceof Prisma.PrismaClientKnownRequestError && (error.code === 'P2025' || error.code === 'P2003')) {
-           throw new BadRequestException(`Invalid toolSubCategoryId: ${toolSubCategoryId} for update.`); // Changed field name
+        if (error instanceof Prisma.PrismaClientKnownRequestError && (error.code == 'P2025' || error.code == 'P2003')) {
+           throw new BadRequestException(`Invalid toolSubCategoryId: ${toolSubCategoryId} for update.`);
        }
        console.error(`Error updating Tool ${id}:`, error);
       throw new InternalServerErrorException('Could not update tool.');
@@ -163,7 +171,7 @@ export class ToolService {
     try {
       await this.prisma.tool.delete({ where: { id } });
     } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2003') {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code == 'P2003') {
         throw new ConflictException(
           `Cannot delete tool ${id}. It is referenced by other records (e.g., Cart Items).`,
         );

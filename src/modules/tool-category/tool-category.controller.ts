@@ -27,10 +27,11 @@ import {
   ApiOkResponse,
   ApiProperty,
 } from '@nestjs/swagger';
-import { JwtAuthGuard } from '../guards/jwt-auth.guard'; // Manzilni to'g'rilang
-import { ToolCategory } from '@prisma/client';
+import { JwtAuthGuard } from '../guards/jwt-auth.guard'; 
+import { ToolCategory, userRole } from '@prisma/client';
+import { RolesGuard } from '../guards/roles.guard';
+import { Roles } from '../guards/roles.decorator';
 
-// Swagger uchun javob sxemasi (ixtiyoriy, lekin tavsiya etiladi)
 class ToolCategoryResponse extends CreateToolCategoryDto {
     @ApiProperty({ example: 'c1b2a3d4-e5f6-7890-1234-567890abcdef' })
     id: string;
@@ -39,7 +40,8 @@ class ToolCategoryResponse extends CreateToolCategoryDto {
     _count?: { tools: number };
 }
 
-@ApiTags('Tool Categories') // Guruh nomini o'zgartirdim
+@Roles(userRole.ADMIN, userRole.SUPERADMIN)
+@ApiTags('Tool Categories') 
 @ApiBearerAuth()
 @Controller('tool-categories')
 export class ToolCategoryController {
@@ -57,20 +59,18 @@ export class ToolCategoryController {
   }
 
   @Get()
-  // @UseGuards(JwtAuthGuard) // Public qilish uchun kommentga oling
   @ApiOperation({ summary: 'Kategoriyalar ro\'yxatini olish (Soddalashtirilgan)' })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'limit', required: false })
   @ApiQuery({ name: 'sortBy', required: false })
   @ApiQuery({ name: 'sortOrder', required: false })
   @ApiQuery({ name: 'search', required: false })
-  @ApiOkResponse({ description: 'Kategoriyalar ro\'yxati' /* type: [ToolCategoryResponse] */ }) // Javob sxemasini ko'rsatish mumkin
+  @ApiOkResponse({ description: 'Kategoriyalar ro\'yxati' }) 
   findAll(@Query() queryDto: QueryToolCategoryDto) {
     return this.toolCategoryService.findAll(queryDto);
   }
 
   @Get(':id')
-  // @UseGuards(JwtAuthGuard) // Public qilish uchun kommentga oling
   @ApiOperation({ summary: 'Bitta kategoriyani olish (Soddalashtirilgan)' })
   @ApiParam({ name: 'id', description: 'Kategoriya IDsi', type: String, format: 'uuid' })
   @ApiOkResponse({ description: 'Topilgan kategoriya', type: ToolCategoryResponse })
@@ -79,6 +79,7 @@ export class ToolCategoryController {
     return this.toolCategoryService.findOne(id);
   }
 
+  @Roles(userRole.ADMIN, userRole.SUPERADMIN)
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Kategoriyani yangilash (Soddalashtirilgan)' })
@@ -95,6 +96,7 @@ export class ToolCategoryController {
     return this.toolCategoryService.update(id, updateDto);
   }
 
+  @Roles(userRole.ADMIN, userRole.SUPERADMIN)
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Kategoriyani o\'chirish (Soddalashtirilgan)' })

@@ -27,7 +27,9 @@ import {
   ApiOkResponse,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
-import { Tool } from '@prisma/client';
+import { RolesGuard } from '../guards/roles.guard';
+import { Tool, userRole } from '@prisma/client';
+import { Roles } from '../guards/roles.decorator';
 
 @ApiTags('Tools')
 @ApiBearerAuth()
@@ -38,6 +40,7 @@ export class ToolController {
   createExample: CreateToolDto ;
   private updateExample: UpdateToolDto;
 
+  @Roles(userRole.ADMIN, userRole.SUPERADMIN)
   @Post()
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Create a new tool' })
@@ -59,18 +62,19 @@ export class ToolController {
   @Get(':id')
   @ApiOperation({ summary: 'Get a single tool by ID' })
   @ApiParam({ name: 'id', type: String, format: 'uuid' })
-  @ApiOkResponse({ description: 'Tool details.', type: CreateToolDto }) // Specify a ToolResponse DTO if needed
+  @ApiOkResponse({ description: 'Tool details.', type: CreateToolDto })
   @ApiResponse({ status: 404, description: 'Tool not found' })
   findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Tool> {
     return this.toolService.findOne(id);
   }
 
+  @Roles(userRole.ADMIN, userRole.SUPERADMIN)
   @Patch(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Update a tool by ID' })
   @ApiParam({ name: 'id', type: String, format: 'uuid' })
   @ApiBody({ type: UpdateToolDto, examples: { default: { value: { price: 36500, quantity: 45 } } } })
-  @ApiOkResponse({ description: 'Tool updated successfully.', type: CreateToolDto }) // Specify a ToolResponse DTO if needed
+  @ApiOkResponse({ description: 'Tool updated successfully.', type: CreateToolDto })
   @ApiResponse({ status: 404, description: 'Tool not found' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
   @ApiResponse({ status: 401, description: 'Unauthorized' })
@@ -81,6 +85,7 @@ export class ToolController {
     return this.toolService.update(id, updateDto);
   }
 
+  @Roles(userRole.ADMIN, userRole.SUPERADMIN)
   @Delete(':id')
   @UseGuards(JwtAuthGuard)
   @ApiOperation({ summary: 'Delete a tool by ID' })

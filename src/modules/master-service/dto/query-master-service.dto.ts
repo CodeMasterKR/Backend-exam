@@ -31,16 +31,16 @@ export class QueryMasterServiceDto {
   })
   @IsOptional()
   @IsString()
-  search?: string; // Note: Simple search implementation needed in service
+  search?: string; 
 
   @ApiPropertyOptional({
     description: 'Field to sort by',
     example: 'priceHourly',
-    default: 'id', // Yoki boshqa default qiymat
+    default: 'id', 
   })
   @IsOptional()
   @IsString()
-  sortBy?: string = 'id'; // Default sort field
+  sortBy?: string = 'id'; 
 
   @ApiPropertyOptional({
     description: 'Sort order',
@@ -53,7 +53,7 @@ export class QueryMasterServiceDto {
 
   @ApiPropertyOptional({
     description: 'Filter by Master ID',
-    example: 'a1b2c3d4-e5f6-7890-1234-567890abcdef',
+    example: 'uuid',
   })
   @IsOptional()
   @IsUUID()
@@ -61,7 +61,7 @@ export class QueryMasterServiceDto {
 
   @ApiPropertyOptional({
     description: 'Filter by MasterCategory ID',
-    example: 'f47ac10b-58cc-4372-a567-0e02b2c3d479',
+    example: 'uuid',
   })
   @IsOptional()
   @IsUUID()
